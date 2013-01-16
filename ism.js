@@ -90,9 +90,11 @@ function ISM(init) {
     
     state.H = [];
     params.b0 = []
+    params.volume0 = 0;
     for (var i = 0; i < state.h.length; i++) {
       state.H.push(state.h[i] - state.b[i]);
       params.b0.push(state.b[i] + params.rho_i / params.rho_m * state.H[i]);
+      params.volume0 += state.H[i] * params.dx;
     }
     that.state = state;
     that.params = params;
@@ -124,9 +126,11 @@ function ISM(init) {
       2510, 2420, 2050, 1350, 675, -0.1, -50, -100, -150, -200];
     state.H = [];
     params.b0 = []
+    params.volume0 = 0;
     for (var i = 0; i < state.h.length; i++) {
       state.H.push(state.h[i] - state.b[i]);
       params.b0.push(state.b[i] + params.rho_i / params.rho_m * state.H[i]);
+      params.volume0 += state.H[i] * params.dx;
     }
     that.state = state;
     that.params = params;
@@ -350,7 +354,7 @@ $(function () {
   plotter.addTimeSeries(
     '#icevolume', 
     'Ice volume (% relative)',
-    [function (it) {return 100 * it.volume / model.history[0].volume}]
+    [function (it) {return 100 * it.volume / model.params.volume0}]
   );
   plotter.addTimeSeries(
     '#tforcing', 
