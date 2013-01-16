@@ -413,6 +413,7 @@ $(function () {
   plotter.redraw();
   $('#play').bind('click', ticker.start);
   $('#stop').bind('click', ticker.stop);
-  $('#restart').bind('click', model.restart);
+  $('#restart').bind('click', function () {model.restart(); plotter.redraw();});
+  $('#zero').bind('click', function () {model.zeroThickness(); plotter.redraw();});
   //ticker.start();
 });
