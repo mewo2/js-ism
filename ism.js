@@ -1,28 +1,5 @@
 "use strict";
 
-function grad(v, dx) {
-  var n = v.length;
-  var g = [(v[1] - v[0])/dx]
-  for (var i = 1; i < n - 1; i++) {
-    g.push((v[i+1] - v[i-1]) * .5 / dx);
-  }
-  g.push((v[n-1] - v[n-2])/dx);
-  return g;
-}
-
-function tridiag(a, b, c, v) {
-  var n = v.length;
-  for (var i = 1; i < n; i++) {
-    var m = a[i] / b[i-1];
-    b[i] -= m * c[i-1];
-    v[i] -= m * v[i-1];
-  }
-  var x = [v[n-1] / b[n-1]];
-  for (var i = n - 2; i >= 0; i--) {
-    x.unshift((v[i] - c[i] * x[0]) / b[i]);
-  }
-  return x;
-}
 function ISM(init) {
   var that = this;
   var constants = {
@@ -49,6 +26,29 @@ function ISM(init) {
       params[p] = extras[p];
     }
     return params;
+  }
+  function grad(v, dx) {
+    var n = v.length;
+    var g = [(v[1] - v[0])/dx]
+    for (var i = 1; i < n - 1; i++) {
+      g.push((v[i+1] - v[i-1]) * .5 / dx);
+    }
+    g.push((v[n-1] - v[n-2])/dx);
+    return g;
+  }
+
+  function tridiag(a, b, c, v) {
+    var n = v.length;
+    for (var i = 1; i < n; i++) {
+      var m = a[i] / b[i-1];
+      b[i] -= m * c[i-1];
+      v[i] -= m * v[i-1];
+    }
+    var x = [v[n-1] / b[n-1]];
+    for (var i = n - 2; i >= 0; i--) {
+      x.unshift((v[i] - c[i] * x[0]) / b[i]);
+    }
+    return x;
   }
   function greenland() {
     var params = paramSet({
