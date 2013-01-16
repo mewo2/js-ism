@@ -162,7 +162,7 @@ function ISM(init) {
       state.Tma.push(-5.31 - 0.007992 * Math.max(state.h[i], state.sealevel) + state.Tf);
       state.Tms.push(7.29 - 0.006277 * Math.max(state.h[i], state.sealevel) + state.Tf);
       state.aabl.push(Math.min(Math.max(-1.4 * state.Tms[i], -10), 0));
-      state.aacc.push((-2.4657 + params.longitude[i] * (0.13657 - 0.0016 * params.longitude[i])) * Math.pow(1.0533, Math.min(state.Tf, 0)));
+      state.aacc.push(Math.max((-2.4657 + params.longitude[i] * (0.13657 - 0.0016 * params.longitude[i])) * Math.pow(1.0533, Math.min(state.Tf, 0)), 0));
     }
   }
   
@@ -248,7 +248,17 @@ function ISM(init) {
     that.state = newstate;
     that.history.push(newstate);
   }
-
+  
+  this.zeroThickness = function () {
+    var state = that.state;
+    var params = that.params;
+    var n = state.H.length;
+    for (var i = 0; i < n; i++) {
+      state.H[i] = 0;
+      state.b[i] = params.b0[i];
+    }
+    that.diagnostic();
+  }
   this.step = function () {
     that.prognostic();
     that.diagnostic();
@@ -350,6 +360,7 @@ function Plotter(model) {
 
 $(function () {
   var model = new ISM('greenland');
+  model.zeroThickness()
   var plotter = new Plotter(model);
   plotter.addTimeSeries(
     '#icevolume', 
@@ -372,13 +383,18 @@ $(function () {
     ['b', 'h']
   );
   plotter.addSection(
+    '#thickness',
+    'Thickness (m)',
+    ['H']
+  );
+  plotter.addSection(
     '#temperature',
     'Temperature (&deg;C)',
     ['Tms', 'Tma']
   );
   var ticker = new Ticker(
     function () {
-      for (var i = 0; i < 20; i++) model.step();
+      for (var i = 0; i < 10; i++) model.step();
       plotter.redraw();
       var Tf = parseFloat($("#tempforcing").val());
       model.state.Tf = Tf;
