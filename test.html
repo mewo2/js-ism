@@ -24,6 +24,16 @@
     .axisLabels {
       font-size: small;
     }
+    
+    .icon {
+      font-size: 400%;
+      text-decoration: none;
+      color:#7f7f7f;
+    }
+    .icon:hover {
+      color:#edc240;
+    }
+      
   </style>
 </head>
 <body>
@@ -44,6 +54,9 @@
       $("#tempforcing").bind("slider:ready slider:changed", function (event, data) {
 	$(this).nextAll("span").html(data.value.toFixed(3))});
     </script>
+      <a href="#" class="icon" id="play">&#9654;</a>
+      <a href="#" class="icon" id="stop">&#9632;</a>
+      <a href="#" class="icon" id="restart">&#9632;</a>
   </div>
   <script language="javascript" type="text/javascript" src="ism.js"></script>
 </body>

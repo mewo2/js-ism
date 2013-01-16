@@ -263,9 +263,16 @@ function ISM(init) {
     that.prognostic();
     that.diagnostic();
   }
-  initialisers[init]();
-  this.diagnostic();
-  this.history = [this.state];
+  this.initialise = function (init) {
+    initialisers[init]();
+    that.diagnostic();
+    that.history = [that.state];
+    that.init = init;
+  }
+  this.restart = function () {
+    that.initialise(that.init);
+  }
+  this.initialise(init);
 }
 
 function Ticker(tickfn) {
@@ -273,7 +280,7 @@ function Ticker(tickfn) {
   this.running = false;
   this.interval = 20;
   function tickInternal() {
-    tickfn();
+    if (that.running) tickfn();
     if (that.running) setTimeout(tickInternal, that.interval);
   }
   this.start = function () {
@@ -282,6 +289,9 @@ function Ticker(tickfn) {
   }
   this.stop = function () {
     that.running = false;
+  }
+  this.tick = function () {
+    tickfn();
   }
 }
 
@@ -394,11 +404,15 @@ $(function () {
   );
   var ticker = new Ticker(
     function () {
-      for (var i = 0; i < 10; i++) model.step();
-      plotter.redraw();
       var Tf = parseFloat($("#tempforcing").val());
       model.state.Tf = Tf;
+      for (var i = 0; i < 10; i++) model.step();
+      plotter.redraw();    
     }
   );
-  ticker.start();
+  plotter.redraw();
+  $('#play').bind('click', ticker.start);
+  $('#stop').bind('click', ticker.stop);
+  $('#restart').bind('click', model.restart);
+  //ticker.start();
 });
