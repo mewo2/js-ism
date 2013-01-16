@@ -6,7 +6,6 @@
   <script language="javascript" type="text/javascript" src="flot/jquery.js"></script>
   <script language="javascript" type="text/javascript" src="flot/jquery.flot.js"></script>
   <script language="javascript" type="text/javascript" src="flot/jquery.flot.axislabels.js"></script>
-  <script language="javascript" type="text/javascript" src="numeric/numeric-1.2.6.js"></script>
   <script language="javascript" type="text/javascript" src="slider/js/simple-slider.js"></script>
   <link rel="stylesheet" type="text/css" href="slider/css/simple-slider.css" />
   <style type="text/css">
@@ -49,13 +48,13 @@
   <script language="javascript" type="text/javascript">
     "use strict";
    
-    function grad(v) {
+    function grad(v, dx) {
       var n = v.length;
-      var g = [v[1] - v[0]]
+      var g = [(v[1] - v[0])/dx]
       for (var i = 1; i < n - 1; i++) {
-	g.push((v[i+1] - v[i-1]) * .5);
+	g.push((v[i+1] - v[i-1]) * .5 / dx);
       }
-      g.push(v[n-1] - v[n-2]);
+      g.push((v[n-1] - v[n-2])/dx);
       return g;
     }
    
@@ -71,27 +70,6 @@
 	x.unshift((v[i] - c[i] * x[0]) / b[i]);
       }
       return x;
-    }
-    function nummax(a, b) {
-      var c = []
-      for (var i = 0; i < a.length; i++) {
-	c.push(Math.max(a[i], b));
-      }
-      return c;
-    }
-    function nummin(a, b) {
-      var c = []
-      for (var i = 0; i < a.length; i++) {
-	c.push(Math.min(a[i], b));
-      }
-      return c;
-    }
-    function numpow(a, n) {
-      var c = []
-      for (var i = 0; i < a.length; i++) {
-	c.push(Math.pow(a[i], n));
-      }
-      return c;
     }
     var constants = {
 	'rho_i': 910,
@@ -155,9 +133,13 @@
 	31.89393939, 30.56818182, 29.24242424, 27.91666667, 26.59090909, 
 	25.26515152, 23.93939394, 22.61363636, 21.28787879, 19.96212121, 
 	18.63636364, 17.31060606, 15.98484848, 14.65909091, 13.33333333];
-
-      state.H = numeric.sub(state.h, state.b);
-      params.b0 = numeric.add(state.b, numeric.mul(params.rho_i/params.rho_m, state.H));
+      
+      state.H = [];
+      params.b0 = []
+      for (var i = 0; i < state.h.length; i++) {
+	state.H.push(state.h[i] - state.b[i]);
+	params.b0.push(state.b[i] + params.rho_i / params.rho_m * state.H[i]);
+      }
       diagnostic(state);
       return state;
     }
@@ -186,87 +168,70 @@
 	3700, 3710, 3720, 3730, 3735, 3740, 3800, 3950, 4020, 4000, 3850, 3760,
 	3710, 3580, 3450, 3340, 3260, 3250, 3240, 3230, 3210, 3150, 3000, 2800, 
 	2510, 2420, 2050, 1350, 675, -0.1, -50, -100, -150, -200];
-      state.H = numeric.sub(state.h, state.b);
-      params.b0 = numeric.add(state.b, numeric.mul(params.rho_i/params.rho_m, state.H));
+      state.H = [];
+      params.b0 = []
+      for (var i = 0; i < state.h.length; i++) {
+	state.H.push(state.h[i] - state.b[i]);
+	params.b0.push(state.b[i] + params.rho_i / params.rho_m * state.H[i]);
+      }
       diagnostic(state);
       return state;
     }
 
     function antarcticClimate(state) {
       var params = state.params;
-      state.Tma = numeric.add(
-		    -15.15,
-		    numeric.mul(-0.012, nummax(state.h, state.sealevel)),
-		    state.Tf);
-      state.Tms = numeric.add(
-		    16.81,
-		    numeric.mul(-0.00692, nummax(state.h, state.sealevel)),
-		    numeric.mul(-0.27937, params.latitude),
-		    state.Tf);
-      
-      state.aabl = nummin(nummax(numeric.mul(-1.4, state.Tms), -10), 0);
-      state.aacc = numeric.mul(2.5, numeric.exp(numeric.div(state.Tma, 15)));
+      state.Tma = [];
+      state.Tms = [];
+      state.aabl = [];
+      state.aacc = [];
+      for (var i = 0; i < state.h.length; i++) {
+	state.Tma.push(-15.15 - 0.012 * Math.max(state.h[i], state.sealevel) + state.Tf);
+	state.Tms.push(16.81 - 0.00692 * Math.max(state.h[i], state.sealevel) - 0.27937 * params.latitude[i] + state.Tf);
+	state.aabl.push(Math.min(Math.max(-1.4 * state.Tms[i], -10), 0));
+	state.aacc.push(2.5 * Math.pow(2, state.Tma[i]/10));
+      }
     }
 
     function greenlandClimate(state) {
       var params = state.params;
-      state.Tma = numeric.add(
-		    -5.31,
-		    numeric.mul(-0.007992, nummax(state.h, state.sealevel)),
-		    state.Tf);
-      state.Tms = numeric.add(
-		    7.29,
-		    numeric.mul(-0.006277, nummax(state.h, state.sealevel)),
-		    state.Tf);
-     
-      state.aabl = nummin(nummax(numeric.mul(-1.4, state.Tms), -10), 0);
-      state.aacc = numeric.mul(
-		    numeric.add(
-		      -2.46257,
-		      numeric.mul(
-			params.longitude,
-			numeric.add(
-			  0.13657,
-			  numeric.mul(
-			    -0.0016,
-			    params.longitude
-			  )
-			)
-		      )
-		    ),
-		    Math.pow(1.0533, Math.max(state.Tf, 0))
-		  );
+      state.Tma = [];
+      state.Tms = [];
+      state.aabl = [];
+      state.aacc = [];
+      for (var i = 0; i < state.h.length; i++) {
+	state.Tma.push(-5.31 - 0.007992 * Math.max(state.h[i], state.sealevel) + state.Tf);
+	state.Tms.push(7.29 - 0.006277 * Math.max(state.h[i], state.sealevel) + state.Tf);
+	state.aabl.push(Math.min(Math.max(-1.4 * state.Tms[i], -10), 0));
+	state.aacc.push((-2.4657 + params.longitude[i] * (0.13657 - 0.0016 * params.longitude[i])) * Math.pow(1.0533, Math.max(state.Tf, 0)));
+      }
     }
     function diagnostic(state) {
       var params = state.params;
       state.sealevel = Math.max(Math.min(state.Tf * 15, 0), -150);
       state.T = state.Tf > 0 ? 0.5 * state.Tf + 263.15 : state.Tf + 263.15;
       state.T = Math.min(state.T, 273.15);
-      state.h = numeric.add(state.b, state.H);
       state.A = params.m * Math.pow(params.B0, -params.n) * Math.exp(3*params.C/Math.pow(params.Tr - state.T, params.K) - params.Q/(params.R * state.T));
-      state.Zstar = nummax(numeric.add(
-		      state.H,
-		      numeric.mul(
-			params.rho_w / params.rho_i,
-			nummin(numeric.sub(state.b, state.sealevel), 0)
-		      )
-		    ), 0.01);
-      state.gradh = numeric.div(grad(state.h), params.dx);
 
-      params.climate(state); 
-      
-      state.D1 =   numeric.add(
-		    numeric.mul(.4, state.A, state.H), 
-		    numeric.div(params.Ab, state.Zstar)
-		  );
-      state.D2 = Math.pow(params.rho_i * params.g, params.n);
-
-      state.D3 = numpow(state.H, params.n + 1);
-
-      state.D4 = numpow(numeric.abs(state.gradh), params.n - 1);
-      state.D = numeric.add(0.0, numeric.mul(state.D1, state.D2, state.D3, state.D4));
-      state.a = numeric.add(state.aacc, state.aabl);
-      state.volume = numeric.sum(state.H) * params.dx;		    
+      state.h = [];
+      state.Zstar = [];
+      for (var i = 0; i < state.H.length; i++) {
+	state.h.push(state.b[i] + state.H[i]);
+	state.Zstar.push(Math.max(state.H[i] + params.rho_w / params.rho_i * Math.min(state.b[i] - state.sealevel, 0), 0.01));
+      }
+      state.gradh = grad(state.h, params.dx);
+      params.climate(state);
+      state.D = [];
+      state.a = [];
+      state.volume = 0;
+      for (var i = 0; i < state.H.length; i++) {
+	state.D.push((.4 * state.A * state.H[i] + params.Ab/state.Zstar[i]) 
+		     * Math.pow(params.rho_i * params.g, params.n)
+		     * Math.pow(state.H[i], params.n + 1)
+		     * Math.pow(Math.abs(state.gradh[i]), params.n - 1)
+		    );
+	state.a.push(state.aacc[i] + state.aabl[i]);
+	state.volume += state.H[i] * params.dx;
+      }
     }
     
     function prognostic(state) {
@@ -277,26 +242,12 @@
 	'Tf': state.Tf,
 	't': state.t + params.dt	
       };
-      newstate.b = numeric.add(
-		    state.b,
-		    numeric.div(
-		      numeric.sub(
-			params.b0,
-			state.b,
-			numeric.mul(
-			  params.rho_i / params.rho_m,
-			  state.H
-			)
-		      ),
-		      params.theta
-		    )
-		  );
-
-      var omega = params.omega;
-      var delta = numeric.add(
-		    state.H,
-		    numeric.mul(params.dt, state.a)
-		  );
+      newstate.b = [];
+      var delta = [];
+      for (var i = 0; i < n; i++) {
+	newstate.b.push(state.b[i] + params.dt * (params.b0[i] - state.b[i] - params.rho_i / params.rho_m * state.H[i]) / params.theta);
+	delta.push(state.H[i] + params.dt * state.a[i]);
+      }
       var alpha_ = [0];
       var gamma_ = [];
       for (var i = 1; i < n; i++) {
@@ -312,6 +263,7 @@
       var gamma = [0];
       var b = newstate.b;
       var H = state.H;
+      var omega = params.omega;
       for (var i = 1; i < n-1; i++) {
 	alpha.push(-omega * alpha_[i]);
 	beta.push(omega * (1 + (alpha_[i] + gamma_[i])));
@@ -322,7 +274,7 @@
       beta.push(1);
       gamma.push(0);
       newstate.H = tridiag(alpha, beta, gamma, delta);
-      for (var i = 0; i < n-1; i++) {
+      for (var i = 0; i < n; i++) {
 	if ((state.H[i] == 0) && (newstate.b[i] < state.sealevel)) newstate.H[i] = 0; 
 	if (newstate.H[i] < Math.max(0, (state.sealevel - state.b[i]) * params.rho_w / params.rho_i)) newstate.H[i] = 0;
       }
