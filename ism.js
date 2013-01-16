@@ -254,6 +254,23 @@ function ISM(init) {
   this.history = [this.state];
 }
 
+function Ticker(tickfn) {
+  var that = this;
+  this.running = false;
+  this.interval = 20;
+  function tickInternal() {
+    tickfn();
+    if (that.running) setTimeout(tickInternal, that.interval);
+  }
+  this.start = function () {
+    that.running = true;
+    tickInternal();
+  }
+  this.stop = function () {
+    that.running = false;
+  }
+}
+
 function timeseries(model, fn) {
   var data = model.history.map(function (it) {return [it.t/1e3, fn(it)]});
   return {
@@ -272,39 +289,7 @@ function section(model, varname) {
     'label': varname
   };
 }
-function performTask(numToBuild, numPerTick, buildItem, update) {
-  var pos = 1;
-  function iteration() {
-    var j = Math.min(pos + numPerTick, numToBuild);
-    for (var i = pos; i < j; i++) {
-      buildItem();
-    }
-    pos += numPerTick;
-    update();
-    if (pos < numToBuild)
-      setTimeout(iteration, 20);
-  }
-  iteration();
-}
 
-function startmodel(model, plots) {
-  performTask(20001, 10,
-    model.step,
-    function () {
-      for (var i = 0; i < plots.length; i++) {
-        var plot = plots[i];
-        var ps = plotsetup[i];
-        var data = ps.data(model);
-        plot.setData(data);
-        plot.setupGrid();
-        plot.draw();
-      }
-      var Tf = parseFloat($("#tempforcing").val());
-      //console.log(Tf);
-      model.state.Tf = Tf;
-    }
-  );
-}	
 var plotsetup = [
   {
     'div': '#icevolume',
@@ -354,6 +339,21 @@ var plotsetup = [
 $(function () {
   var plots = [];
   var model = new ISM('greenland');
+  var ticker = new Ticker(
+    function () {
+      for (var i = 0; i < 20; i++) model.step();
+      for (var i = 0; i < plots.length; i++) {
+        var plot = plots[i];
+        var ps = plotsetup[i];
+        var data = ps.data(model);
+        plot.setData(data);
+        plot.setupGrid();
+        plot.draw();
+      }
+      var Tf = parseFloat($("#tempforcing").val());
+      model.state.Tf = Tf;
+    }
+  );
   for (var i = 0; i < plotsetup.length; i++) {
     var ps = plotsetup[i];
     var options = {
@@ -368,5 +368,5 @@ $(function () {
     };
     plots.push($.plot($(ps.div), [[]], options));
   }
-  startmodel(model, plots);
+  ticker.start();
 });
