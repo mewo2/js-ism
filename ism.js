@@ -271,102 +271,114 @@ function Ticker(tickfn) {
   }
 }
 
-function timeseries(model, fn) {
-  var data = model.history.map(function (it) {return [it.t/1e3, fn(it)]});
-  return {
-    'data': data,
-  };
-}
-function section(model, varname) {
-  var it = model.state;
-  var data = [];
-  var iv = it[varname];
-  for (var i = 0; i < iv.length; i++) {
-    data.push([i * model.params.dx / 1e3, iv[i]]); 
+function Plotter(model) {
+  var that = this;
+  var plots = [];
+  function timeseries(model, fn) {
+    var data = model.history.map(function (it) {return [it.t/1e3, fn(it)]});
+    return {
+      'data': data,
+    };
   }
-  return {
-    'data': data,
-    'label': varname
-  };
-}
+  function section(model, varname) {
+    var it = model.state;
+    var data = [];
+    var iv = it[varname];
+    for (var i = 0; i < iv.length; i++) {
+      data.push([i * model.params.dx / 1e3, iv[i]]); 
+    }
+    return {
+      'data': data,
+      'label': varname
+    };
+  }
+  this.addPlot = function (divname, xlabel, ylabel, datafn) {
+    var options = {
+      'series': {'shadowSize': 0},
+      'yaxis': {
+        'axisLabel': ylabel,
+        'axisLabelPadding': 10
+      },
+      'xaxis': {
+        'axisLabel': xlabel
+      }
+    }
+    var div = $(divname);
+    if (div.length == 0) return;
+    plots.push({
+      'plot': $.plot(div, [[]], options),
+      'data': datafn
+    });
+  }
+  this.addTimeSeries = function (divname, axislabel, fns) {
+    that.addPlot(divname, 'Time (ky)', axislabel,
+      function (model) {
+        return fns.map(
+          function (fn) {
+            return timeseries(model, fn);
+          }
+        )
+      }
+    );
+  }
+  this.addSection = function (divname, axislabel, vars) {
+    that.addPlot(divname, 'Distance (km)', axislabel, 
+      function (model) {
+        return vars.map(
+          function (v) {
+            return section(model, v);
+          }
+        )
+      }
+    );
+  }
 
-var plotsetup = [
-  {
-    'div': '#icevolume',
-    'data': function (model) {
-      return [timeseries(model, 
-    	    function (it) {return 100 * it.volume / model.history[0].volume}
-    	  )];
-    },
-    'ylabel': "Ice volume (% relative)",
-    'xlabel': "Time (ky)"
-  },
-  {
-    'div': '#elevation',
-    'data': function (model) {
-      return [section(model, 'b'), section(model, 'h')];
-    },
-    'ylabel': "Elevation (m)",
-    'xlabel': "Distance (km)"
-  },
-  {
-    'div': '#tforcing',
-    'data': function (model) {
-      return [timeseries(model,
-    	    function (it) {return it.Tf})];
-    },
-    'ylabel': "Thermal forcing (K)",
-    'xlabel': "Time (ky)"
-  },
-  {
-    'div': '#massbalance',
-    'data': function (model) {
-      return [section(model, 'a'), section(model, 'aacc'), section(model, 'aabl')];
-    },
-    'ylabel': "Mass balance (m/y)",
-    'xlabel': "Distance (km)"
-  },
-  {
-    'div': '#temperature',
-    'data': function (model) {
-      return [section(model, 'Tms'), section(model, 'Tma')];
-    },
-    'ylabel': "Temperature (&deg;C)",
-    'xlabel': "Distance (km)"
+  this.redraw = function () {
+    for (var p in plots) {
+      var plot = plots[p].plot;
+      var data = plots[p].data(model);
+      plot.setData(data);
+      plot.setupGrid();
+      plot.draw();
+    }
   }
-];
+}
 
 $(function () {
-  var plots = [];
   var model = new ISM('greenland');
+  var plotter = new Plotter(model);
+  plotter.addTimeSeries(
+    '#icevolume', 
+    'Ice volume (% relative)',
+    [function (it) {return 100 * it.volume / model.history[0].volume}]
+  );
+  plotter.addTimeSeries(
+    '#tforcing', 
+    'Thermal forcing (K)',
+    [function (it) {return it.Tf}]
+  );
+  plotter.addSection(
+    '#massbalance',
+    'Mass balance (m/y)',
+    ['a', 'aacc', 'aabl']
+  );
+  plotter.addSection(
+    '#elevation',
+    'Elevation (m)',
+    ['b', 'h']
+  );
+  plotter.addSection(
+    '#temperature',
+    'Temperature (&deg;C)',
+    ['Tms', 'Tma']
+  );
   var ticker = new Ticker(
     function () {
       for (var i = 0; i < 20; i++) model.step();
-      for (var i = 0; i < plots.length; i++) {
-        var plot = plots[i];
-        var ps = plotsetup[i];
-        var data = ps.data(model);
-        plot.setData(data);
-        plot.setupGrid();
-        plot.draw();
-      }
+      plotter.redraw();
       var Tf = parseFloat($("#tempforcing").val());
       model.state.Tf = Tf;
     }
   );
-  for (var i = 0; i < plotsetup.length; i++) {
-    var ps = plotsetup[i];
-    var options = {
-  	  yaxis: {
-        'axisLabel': ps.ylabel,
-        'axisLabelPadding': 10
-      },
-      xaxis: {
-        'axisLabel': ps.xlabel
-      },
-      'series': {'shadowSize': 0}
-    };
-    plots.push($.plot($(ps.div), [[]], options));
-  }
   ticker.start();
 });
