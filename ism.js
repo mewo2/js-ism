@@ -7,14 +7,14 @@ function ISM(init) {
     'rho_w': 1028,
     'rho_m': 3300,
     'theta': 3000,
-    'B0': 2.207,
+    'B0': 1.928,
     'C': 0.16612,
     'K': 1.17,
     'n': 3,
     'p': 3,
     'Q': 78800,
     'R': 8.31,
-    'Tr': 273.39,
+    'Tr': 280,
     'g': 9.81
   };
   function paramSet(extras) {
@@ -325,6 +325,10 @@ function Plotter(model) {
       },
       'xaxis': {
         'axisLabel': xlabel
+      },
+      'grid': {
+        'backgroundColor': 'white',
+        'minBorderMargin': 20
       }
     }
     var div = $(divname);
