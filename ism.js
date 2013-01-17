@@ -312,7 +312,9 @@ function Ticker(tickfn) {
   var that = this;
   this.running = false;
   this.interval = 20;
+  var stopfn = null;
   function tickInternal() {
+    if (stopfn && stopfn()) that.stop();
     if (that.running) tickfn();
     if (that.running) setTimeout(tickInternal, that.interval);
   }
@@ -320,8 +322,13 @@ function Ticker(tickfn) {
     that.running = true;
     tickInternal();
   }
+  this.runUntil = function (fn) {
+    stopfn = fn;
+    that.start();
+  }
   this.stop = function () {
     that.running = false;
+    stopfn = null;
   }
   this.tick = function () {
     tickfn();
@@ -459,6 +466,10 @@ $(function () {
   );
   plotter.redraw();
   $('#play').click(ticker.start);
+  $('#play10k').click(function () {
+                        var t0 = model.state.t; 
+                        ticker.runUntil(function () {return model.state.t >= t0 + 10000;});
+                      });  
   $('#stop').click(ticker.stop);
   $('#restart').click(function () {model.restart(); plotter.redraw();});
   $('#zero').click(function () {model.zeroThickness(); plotter.redraw();});
