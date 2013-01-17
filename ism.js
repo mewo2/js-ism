@@ -204,6 +204,9 @@ function ISM(init, options) {
     params.climate();
     state.D = [];
     state.a = [];
+    state.ud = [];
+    state.ub = [];
+    state.u = [];
     state.volume = 0;
     var Ab = basalSliding ? params.Ab : 0;
     for (var i = 0; i < state.H.length; i++) {
@@ -214,6 +217,9 @@ function ISM(init, options) {
         );
       state.a.push(state.aacc[i] + state.aabl[i]);
       state.volume += state.H[i] * params.dx;
+      state.ud.push(.4 * state.A * state.H[i] * Math.pow(params.rho_i * params.g * state.H[i] * Math.abs(state.gradh[i]), params.n));
+      state.ub.push(Ab / state.Zstar[i] * Math.pow(params.rho_i * params.g * state.H[i] * Math.abs(state.gradh[i]), params.p));
+      state.u.push(state.ud[i] + state.ub[i]);
     }
   }
 
@@ -456,6 +462,11 @@ $(function () {
     '#temperature',
     'Temperature (&deg;C)',
     ['Tms', 'Tma']
+  );
+  plotter.addSection(
+    '#velocity',
+    'Velocity (m/y)',
+    ['ud', 'ub', 'u']
   );
   var ticker = new Ticker(
     function () {
