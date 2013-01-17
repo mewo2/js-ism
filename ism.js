@@ -275,7 +275,8 @@ function ISM(init, options) {
     var n = state.H.length;
     for (var i = 0; i < n; i++) {
       state.H[i] = 0;
-      state.b[i] = params.b0[i];
+      if (isostaticBed)
+        state.b[i] = params.b0[i];
     }
     that.diagnostic();
   }
