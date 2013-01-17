@@ -484,5 +484,4 @@ $(function () {
   
   $("input#tempforcing").bind("slider:ready slider:changed", function (event, data) {
   	$("span#tempforcing").html(data.value.toFixed(0))});
-  //ticker.start();
 });
