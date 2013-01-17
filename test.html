@@ -23,7 +23,7 @@
     }
     
     .controls {
-      width: 1000px;
+      width: 1200px;
       height: 80px;
       float: left;
       position: relative;
@@ -56,7 +56,7 @@
       <a href="#" class="icon" id="greenland" title="Greenland">G</a>
       <a href="#" class="icon" id="antarctica" title="Antarctica">A</a>
     </div>
-    <div style="float: left; margin-left:50px; margin-top:10px;">
+    <div style="float: left; margin-left:50px; margin-top:10px; width:350px;">
         <input type="text" id="tempforcing" data-slider="true" value="0" data-slider-range="-15,25" data-slider-step="1"/>
       <p style="text-align:center">
         Thermal forcing: <span id="tempforcing"></span>K
@@ -65,6 +65,12 @@
         $("input#tempforcing").bind("slider:ready slider:changed", function (event, data) {
   	$("span#tempforcing").html(data.value.toFixed(0))});
       </script>
+    </div>
+    <div style="float: left; margin-left:50px; margin-top:10px;">
+      <input type="checkbox" id="sealevel">Sea level lowering</input>
+      <input type="checkbox" id="tempcoupling">Ice-temperature coupling</input><br />
+      <input type="checkbox" id="isostatic">Isostatic bed adjustment</input>
+      <input type="checkbox" id="basalsliding">Basal sliding</input>
     </div>
   </div>
   <div style="float: left; width:400px; padding:0px; margin:0px; position:relative;">
