@@ -308,8 +308,10 @@ function Plotter(model) {
     var it = model.state;
     var data = [];
     var iv = it[varname];
-    for (var i = 0; i < iv.length; i++) {
-      data.push([i * model.params.dx / 1e3, iv[i]]); 
+    for (var i = 0; i < model.state.H.length; i++) {
+      var val = iv;
+      if ($.isArray(val)) val = iv[i];
+      data.push([i * model.params.dx / 1e3, val]); 
     }
     return {
       'data': data,
@@ -393,7 +395,7 @@ $(function () {
   plotter.addSection(
     '#elevation',
     'Elevation (m)',
-    ['b', 'h']
+    ['b', 'sealevel', 'h']
   );
   plotter.addSection(
     '#thickness',
