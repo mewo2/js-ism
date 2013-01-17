@@ -1,6 +1,6 @@
 "use strict";
 
-function ISM(init) {
+function ISM(init, basalSliding) {
   var that = this;
   var constants = {
     'rho_i': 910,
@@ -190,8 +190,9 @@ function ISM(init) {
     state.D = [];
     state.a = [];
     state.volume = 0;
+    var Ab = basalSliding ? params.Ab : 0;
     for (var i = 0; i < state.H.length; i++) {
-      state.D.push((.4 * state.A * state.H[i] + params.Ab/state.Zstar[i]) 
+      state.D.push((.4 * state.A * state.H[i] + Ab/state.Zstar[i]) 
                    * Math.pow(params.rho_i * params.g, params.n)
                    * Math.pow(state.H[i], params.n + 1)
                    * Math.pow(Math.abs(state.gradh[i]), params.n - 1)
@@ -271,6 +272,9 @@ function ISM(init) {
   }
   this.restart = function () {
     that.initialise(that.init);
+  }
+  this.setBasalSliding = function (val) {
+    basalSliding = val;
   }
   this.initialise(init);
 }
@@ -375,7 +379,7 @@ function Plotter(model) {
 }
 
 $(function () {
-  var model = new ISM('greenland');
+  var model = new ISM('greenland', $('#basalsliding').is(':checked'));
   var plotter = new Plotter(model);
   plotter.addTimeSeries(
     '#icevolume', 
@@ -422,6 +426,8 @@ $(function () {
   $('#zero').bind('click', function () {model.zeroThickness(); plotter.redraw();});
   $('#greenland').bind('click', function () {model.initialise('greenland'); plotter.redraw();});
   $('#antarctica').bind('click', function () {model.initialise('antarctica'); plotter.redraw();});
-  
+  $('#basalsliding').change( function() {model.setBasalSliding($(this).is(':checked'))});
+  $("input#tempforcing").bind("slider:ready slider:changed", function (event, data) {
+  	$("span#tempforcing").html(data.value.toFixed(0))});
   //ticker.start();
 });

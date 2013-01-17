@@ -59,12 +59,8 @@
     <div style="float: left; margin-left:50px; margin-top:10px; width:350px;">
         <input type="text" id="tempforcing" data-slider="true" value="0" data-slider-range="-15,25" data-slider-step="1"/>
       <p style="text-align:center">
-        Thermal forcing: <span id="tempforcing"></span>K
+        Thermal forcing: <span id="tempforcing">0</span>K
       </p>
-      <script>
-        $("input#tempforcing").bind("slider:ready slider:changed", function (event, data) {
-  	$("span#tempforcing").html(data.value.toFixed(0))});
-      </script>
     </div>
     <div style="float: left; margin-left:50px; margin-top:10px;">
       <input type="checkbox" id="sealevel">Sea level lowering</input>
