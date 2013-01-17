@@ -1,7 +1,12 @@
 "use strict";
 
-function ISM(init, basalSliding) {
+function ISM(init, options) {
   var that = this;
+  var basalSliding = options.basalSliding === undefined ? true : options.basalSliding;
+  var isostaticBed = options.isostaticBed === undefined ? true : options.isostaticBed;
+  var sealevelVary = options.sealevelVary === undefined ? true : options.sealevelVary;
+  var tempCoupling = options.tempCoupling === undefined ? true : options.tempCoupling;
+  
   var constants = {
     'rho_i': 910,
     'rho_w': 1028,
@@ -57,6 +62,7 @@ function ISM(init, basalSliding) {
       'dt': 40,
       'omega': 1.0,
       'Ab': 1.21e-10,
+      'A0': 2.43e-16,
       'climate': greenlandClimate
     });
     var state = {'params': params};
@@ -96,6 +102,7 @@ function ISM(init, basalSliding) {
       params.b0.push(state.b[i] + params.rho_i / params.rho_m * state.H[i]);
       params.volume0 += state.H[i] * params.dx;
     }
+    state.sealevel = 0;
     that.state = state;
     that.params = params;
   }
@@ -107,6 +114,7 @@ function ISM(init, basalSliding) {
       'dt': 200,
       'omega': 2.5,
       'Ab': 9.56e-10,
+      'A0': 1.9e-15,
       'climate': antarcticClimate
     });
     var state = {'params': params};
@@ -132,6 +140,7 @@ function ISM(init, basalSliding) {
       params.b0.push(state.b[i] + params.rho_i / params.rho_m * state.H[i]);
       params.volume0 += state.H[i] * params.dx;
     }
+    state.sealevel = 0;
     that.state = state;
     that.params = params;
   }
@@ -174,10 +183,16 @@ function ISM(init, basalSliding) {
   this.diagnostic = function () {
     var params = that.params;
     var state = that.state;
-    state.sealevel = Math.max(Math.min(state.Tf * 15, 0), -150);
+
+    if (sealevelVary)
+      state.sealevel = Math.max(Math.min(state.Tf * 15, 0), -150);
+      
     state.T = state.Tf > 0 ? 0.5 * state.Tf + 263.15 : state.Tf + 263.15;
     state.T = Math.min(state.T, 273.15);
-    state.A = params.m * Math.pow(params.B0, -params.n) * Math.exp(3*params.C/Math.pow(params.Tr - state.T, params.K) - params.Q/(params.R * state.T));
+    if (tempCoupling) 
+      state.A = params.m * Math.pow(params.B0, -params.n) * Math.exp(3*params.C/Math.pow(params.Tr - state.T, params.K) - params.Q/(params.R * state.T));
+    else
+      state.A = params.A0;
 
     state.h = [];
     state.Zstar = [];
@@ -213,7 +228,10 @@ function ISM(init, basalSliding) {
     newstate.b = [];
     var delta = [];
     for (var i = 0; i < n; i++) {
-      newstate.b.push(state.b[i] + params.dt * (params.b0[i] - state.b[i] - params.rho_i / params.rho_m * state.H[i]) / params.theta);
+      if (isostaticBed)
+        newstate.b.push(state.b[i] + params.dt * (params.b0[i] - state.b[i] - params.rho_i / params.rho_m * state.H[i]) / params.theta);
+      else
+        newstate.b.push(state.b[i]);
       delta.push(state.H[i] + params.dt * state.a[i]);
     }
     var alpha_ = [0];
@@ -246,6 +264,7 @@ function ISM(init, basalSliding) {
       if ((state.H[i] == 0) && (newstate.b[i] < state.sealevel)) newstate.H[i] = 0; 
       if (newstate.H[i] < Math.max(0, (state.sealevel - state.b[i]) * params.rho_w / params.rho_i)) newstate.H[i] = 0;
     }
+    newstate.sealevel = state.sealevel;
     that.state = newstate;
     that.history.push(newstate);
   }
@@ -276,6 +295,16 @@ function ISM(init, basalSliding) {
   this.setBasalSliding = function (val) {
     basalSliding = val;
   }
+  this.setTempCoupling = function (val) {
+    tempCoupling = val;
+  }
+  this.setIsostaticBed = function (val) {
+    isostaticBed = val;
+  }
+  this.setSealevelVary = function (val) {
+    sealevelVary = val;
+  }
+
   this.initialise(init);
 }
 
@@ -379,7 +408,16 @@ function Plotter(model) {
 }
 
 $(function () {
-  var model = new ISM('greenland', $('#basalsliding').is(':checked'));
+  var model = new ISM(
+                'greenland',
+                {
+                  'basalSliding': $('#basalsliding').is(':checked'),
+                  'sealevelVary': $('#sealevel').is(':checked'),
+                  'isostaticBed': $('#isostatic').is(':checked'),
+                  'tempCoupling': $('#tempcoupling').is(':checked'),
+                }
+              );
+              
   var plotter = new Plotter(model);
   plotter.addTimeSeries(
     '#icevolume', 
@@ -420,13 +458,18 @@ $(function () {
     }
   );
   plotter.redraw();
-  $('#play').bind('click', ticker.start);
-  $('#stop').bind('click', ticker.stop);
-  $('#restart').bind('click', function () {model.restart(); plotter.redraw();});
-  $('#zero').bind('click', function () {model.zeroThickness(); plotter.redraw();});
-  $('#greenland').bind('click', function () {model.initialise('greenland'); plotter.redraw();});
-  $('#antarctica').bind('click', function () {model.initialise('antarctica'); plotter.redraw();});
+  $('#play').click(ticker.start);
+  $('#stop').click(ticker.stop);
+  $('#restart').click(function () {model.restart(); plotter.redraw();});
+  $('#zero').click(function () {model.zeroThickness(); plotter.redraw();});
+  $('#greenland').click(function () {model.initialise('greenland'); plotter.redraw();});
+  $('#antarctica').click(function () {model.initialise('antarctica'); plotter.redraw();});
+  
   $('#basalsliding').change( function() {model.setBasalSliding($(this).is(':checked'))});
+  $('#isostatic').change( function() {model.setIsostaticBed($(this).is(':checked'))});  
+  $('#sealevel').change( function() {model.setSealevelVary($(this).is(':checked'))});
+  $('#tempcoupling').change( function() {model.setTempCoupling($(this).is(':checked'))});  
+  
   $("input#tempforcing").bind("slider:ready slider:changed", function (event, data) {
   	$("span#tempforcing").html(data.value.toFixed(0))});
   //ticker.start();
