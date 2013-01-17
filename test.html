@@ -47,17 +47,19 @@
   <div class="uiblock graph" id="thickness"></div>
   <div class="uiblock controls">
     <p>
-      <input type="text" id="tempforcing" data-slider="true" value="0" data-slider-range="-20,20"/>
+      <input type="text" id="tempforcing" data-slider="true" value="0" data-slider-range="-15,25" data-slider-step="1"/>
       Thermal forcing: <span id="tempforcing"></span>K
     </p>
     <script>
       $("#tempforcing").bind("slider:ready slider:changed", function (event, data) {
-	$(this).nextAll("span").html(data.value.toFixed(3))});
+	$(this).nextAll("span").html(data.value.toFixed(0))});
     </script>
-      <a href="#" class="icon" id="play">&#9654;</a>
-      <a href="#" class="icon" id="stop">&#9632;</a>
-      <a href="#" class="icon" id="restart">&#8634;</a>
-      <a href="#" class="icon" id="zero">&#8650;</a>
+      <a href="#" class="icon" id="play" title="Run model">&#9654;</a>
+      <a href="#" class="icon" id="stop" title="Stop model">&#9632;</a>
+      <a href="#" class="icon" id="restart" title="Restart model">&#8634;</a>
+      <a href="#" class="icon" id="zero" title="Zero ice thickness">&#8650;</a>
+      <a href="#" class="icon" id="greenland" title="Greenland">G</a>
+      <a href="#" class="icon" id="antarctica" title="Antarctica">A</a>
   </div>
   <script language="javascript" type="text/javascript" src="ism.js"></script>
 </body>

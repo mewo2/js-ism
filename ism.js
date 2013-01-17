@@ -370,7 +370,6 @@ function Plotter(model) {
 
 $(function () {
   var model = new ISM('greenland');
-  model.zeroThickness()
   var plotter = new Plotter(model);
   plotter.addTimeSeries(
     '#icevolume', 
@@ -415,5 +414,8 @@ $(function () {
   $('#stop').bind('click', ticker.stop);
   $('#restart').bind('click', function () {model.restart(); plotter.redraw();});
   $('#zero').bind('click', function () {model.zeroThickness(); plotter.redraw();});
+  $('#greenland').bind('click', function () {model.initialise('greenland'); plotter.redraw();});
+  $('#antarctica').bind('click', function () {model.initialise('antarctica'); plotter.redraw();});
+  
   //ticker.start();
 });
