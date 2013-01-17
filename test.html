@@ -11,6 +11,7 @@
   <style type="text/css">
     body {
       font-family: sans-serif;
+      background-color: #eeeeee;
     }
     .uiblock {
       width: 400px;
@@ -18,9 +19,18 @@
       padding: 0px;
       position: relative;
       float: left;
-      margin: 10px;
+      margin: 0px;
     }
-
+    
+    .controls {
+      width: 1000px;
+      height: 80px;
+      float: left;
+      position: relative;
+      padding: 0px;
+      margin: 0px;
+      margin-left: 20px;
+    }
     .axisLabels {
       font-size: small;
     }
@@ -37,6 +47,26 @@
   </style>
 </head>
 <body>
+  <div class="controls">
+    <div style="float: left;">
+      <a href="#" class="icon" id="play" title="Run model">&#9654;</a>
+      <a href="#" class="icon" id="stop" title="Stop model">&#9632;</a>
+      <a href="#" class="icon" id="restart" title="Restart model">&#8634;</a>
+      <a href="#" class="icon" id="zero" title="Zero ice thickness">&#8650;</a>
+      <a href="#" class="icon" id="greenland" title="Greenland">G</a>
+      <a href="#" class="icon" id="antarctica" title="Antarctica">A</a>
+    </div>
+    <div style="float: left; margin-left:50px; margin-top:10px;">
+        <input type="text" id="tempforcing" data-slider="true" value="0" data-slider-range="-15,25" data-slider-step="1"/>
+      <p style="text-align:center">
+        Thermal forcing: <span id="tempforcing"></span>K
+      </p>
+      <script>
+        $("input#tempforcing").bind("slider:ready slider:changed", function (event, data) {
+  	$("span#tempforcing").html(data.value.toFixed(0))});
+      </script>
+    </div>
+  </div>
   <div style="float: left; width:400px; padding:0px; margin:0px; position:relative;">
     <div class="uiblock graph" id="icevolume"></div>
     <div class="uiblock graph" id="tforcing" ></div>
@@ -45,22 +75,7 @@
   <div class="uiblock graph" id="massbalance"></div>
   <div class="uiblock graph" id="temperature"></div>
   <div class="uiblock graph" id="thickness"></div>
-  <div class="uiblock controls">
-    <p>
-      <input type="text" id="tempforcing" data-slider="true" value="0" data-slider-range="-15,25" data-slider-step="1"/>
-      Thermal forcing: <span id="tempforcing"></span>K
-    </p>
-    <script>
-      $("#tempforcing").bind("slider:ready slider:changed", function (event, data) {
-	$(this).nextAll("span").html(data.value.toFixed(0))});
-    </script>
-      <a href="#" class="icon" id="play" title="Run model">&#9654;</a>
-      <a href="#" class="icon" id="stop" title="Stop model">&#9632;</a>
-      <a href="#" class="icon" id="restart" title="Restart model">&#8634;</a>
-      <a href="#" class="icon" id="zero" title="Zero ice thickness">&#8650;</a>
-      <a href="#" class="icon" id="greenland" title="Greenland">G</a>
-      <a href="#" class="icon" id="antarctica" title="Antarctica">A</a>
-  </div>
+  
   <script language="javascript" type="text/javascript" src="ism.js"></script>
 </body>
 </html>
