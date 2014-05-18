@@ -36,20 +36,33 @@
 
 <p>J-ISM (Javascript Ice Sheet Model) is an educational numerical model of the Greenland and East Antarctic ice sheets, which runs interactively in a browser. The model allows users to simulate the behaviour of both ice sheets under different climate scenarios, as well as to look at the effects of different physical processes on the results. </p>
 
-<p>Numerically, the model is a reimplementation of Frank Pattyn's Excel-based GRANTISM - a flowline model using the Shallow Ice Approximation. It includes basal sliding and isostatic adjustment of the bedrock, as well as simplified models of thermomechanical coupling and sea level adjustment.</p>
+<p>Numerically, the model is a reimplementation of Frank Pattyn's Excel-based <a href="http://homepages.ulb.ac.be/%7Efpattyn/grantism/welcome.html">GRANTISM</a> - a flowline model using the Shallow Ice Approximation. It includes basal sliding and isostatic adjustment of the bedrock, as well as simplified models of thermomechanical coupling and sea level adjustment.</p>
 
 <p>The model is designed so that it should be easy to provide different interfaces for different classes of user, with some basic knowledge of HTML. A sample interface is provided.</p>
+
+<p>If you want to play with a copy of J-ISM, there's a version online <a href="http://mewo2.com/ism.html">here</a>. There are also some basic teaching materials available <a href="http://mewo2.com/assets/practical.pdf">here</a> and <a href="http://mewo2.com/assets/model.pdf">here</a>, although these are not up-to-date with the current interface.</p>
 
 <h2>
 <a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h2>
 
-<p>The following external libraries are used by the model, and included in the <code>external</code> directory. You may want to replace them with your own locally installed copies (particularly jQuery).</p>
+<p>The following external libraries are used by the model, and included in the <code>external</code> directory. You may want to replace them with your own locally installed copies.</p>
 
 <ul>
-<li><a href="http://jquery.com/">jQuery</a></li>
-<li><a href="http://loopj.com/jquery-simple-slider/">jQuery Simple Slider</a></li>
-<li><a href="http://www.flotcharts.org/">Flot</a></li>
-</ul>
+<li><a href="https://github.com/seiyria/bootstrap-slider">Bootstrap slider</a></li>
+<li><a href="https://github.com/markrcote/flot-axislabels">Flot axis-labels</a></li>
+</ul><p>There are also some libraries which are loaded via a CDN. You can probably get by without your own copy of these, unless you need a version of the model which can run offline.</p>
+
+<ul>
+<li>
+<a href="http://getbootstrap.com">Bootstrap</a> - interface styling</li>
+<li>
+<a href="http://jquery.com">jQuery</a> - utilities for Javascript on the web</li>
+<li>
+<a href="http://www.flotcharts.org">Flot</a> - graph plotting</li>
+</ul><h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>J-ISM is released under an MIT license.</p>
       </section>
     </div>
 
