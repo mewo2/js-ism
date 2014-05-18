@@ -17,9 +17,14 @@ The following external libraries are used by the model, and included in the `ext
 
 There are also some libraries which are loaded via a CDN. You can probably get by without your own copy of these, unless you need a version of the model which can run offline.
 
- * [Bootstrap][http://getbootstrap.com] - interface styling
- * [jQuery][http://jquery.com] - utilities for Javascript on the web
- * [Flot][http://jquery.com] - plotting
+ * [Bootstrap](http://getbootstrap.com) - interface styling
+ * [jQuery](http://jquery.com) - utilities for Javascript on the web
+ * [Flot](http://www.flotcharts.org) - graph plotting
+
+## License ##
+
+J-ISM is released under an MIT license.
+
 
 [grantism]: http://homepages.ulb.ac.be/~fpattyn/grantism/welcome.html
 [jism]: http://mewo2.com/ism.html
