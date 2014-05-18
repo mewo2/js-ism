@@ -1,83 +1,122 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Javascript Ice Sheet Model</title>
-  <script language="javascript" type="text/javascript" src="external/flot/jquery.js"></script>
-  <script language="javascript" type="text/javascript" src="external/flot/jquery.flot.js"></script>
-  <script language="javascript" type="text/javascript" src="external/flot/jquery.flot.axislabels.js"></script>
-  <script language="javascript" type="text/javascript" src="external/slider/js/simple-slider.js"></script>
-  <link rel="stylesheet" type="text/css" href="external/slider/css/simple-slider.css" />
-  <style type="text/css">
-    body {
-      font-family: sans-serif;
-      background-color: #eeeeee;
-    }
-    .uiblock {
-      width: 400px;
-      height: 250px;
-      padding: 0px;
-      position: relative;
-      float: left;
-      margin: 0px;
-    }
-    
-    .controls {
-      width: 1200px;
-      height: 80px;
-      float: left;
-      position: relative;
-      padding: 0px;
-      margin: 0px;
-      margin-left: 20px;
-    }
-    .axisLabels {
-      font-size: small;
-    }
-    
-    .icon {
-      font-size: 400%;
-      text-decoration: none;
-      color:#7f7f7f;
-    }
-    .icon:hover {
-      color:#edc240;
-    }
-      
-  </style>
-</head>
-<body>
-  <div class="controls">
-    <div style="float: left;">
-      <a href="#" class="icon" id="play" title="Run model">&#9654;</a>
-      <a href="#" class="icon" id="play10k" title="Run model 10,000 years">&#9321;</a>
-      <a href="#" class="icon" id="stop" title="Stop model">&#9632;</a>
-      <a href="#" class="icon" id="restart" title="Restart model">&#8634;</a>
-      <a href="#" class="icon" id="zero" title="Zero ice thickness">&#8650;</a>
-      <a href="#" class="icon" id="greenland" title="Greenland">G</a>
-      <a href="#" class="icon" id="antarctica" title="Antarctica">A</a>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="external/bootstrap-slider.min.css">
+    <style type="text/css">
+      .graph {
+        height: 250px;
+      }
+      .slider.slider-vertical {
+        margin-top: 20px;
+        height: 190px;
+      }
+    </style>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <title>Javascript Ice Sheet Model</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header">
+        <h1>J-ISM <small>An interactive ice sheet model</small></h1>
+      </div>
+      <div class="row">
+        <div class="btn-toolbar">
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-default" id="play">
+              <span class="glyphicon glyphicon-play"></span>
+              Run
+            </button>
+            <button type="button" class="btn btn-default" id="play10k">
+              <span class="glyphicon glyphicon-step-forward"></span>
+              Run 10ky
+            </button>
+            <button type="button" class="btn btn-default" id="stop">
+              <span class="glyphicon glyphicon-stop"></span>
+              Stop
+            </button>
+            <button type="button" class="btn btn-default" id="restart">
+              <span class="glyphicon glyphicon-refresh"></span>
+              Restart
+            </button>
+          </div>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-default" id="zero">
+              <span class="glyphicon glyphicon-arrow-down"></span>
+              Zero ice thickness
+            </button>
+          </div>
+
+          <div class="btn-group btn-group-sm" data-toggle="buttons">
+            <label class="btn btn-default">
+              <input type="checkbox" id="sealevel"/> Sea level lowering
+            </label>
+            <label class="btn btn-default">
+              <input type="checkbox" id="tempcoupling"/> Ice-temperature coupling
+            </label>
+            <label class="btn btn-default">
+              <input type="checkbox" id="isostatic"/> Isostatic bed adjustment
+            </label>
+            <label class="btn btn-default">
+              <input type="checkbox" id="basalsliding"/> Basal sliding
+            </label>
+          </div>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+              Scenario
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="#" id="greenland">Greenland</a></li>
+              <li><a href="#" id="antarctica">East Antarctica</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 col-sm-6">
+          <div class="col-xs-2">
+            <input type="text" id="tempforcing" data-slider="true" data-slider-value="0" value="0" data-slider-min="-15" data-slider-max="25" data-slider-step="1" data-slider-orientation="vertical"/>
+          </div>
+          <div class="col-xs-10 graph" id="tforcing"></div>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+          <div class="graph" id="elevation"></div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <div class="graph" id="massbalance"></div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <div class="graph" id="icevolume"></div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <div class="graph" id="temperature"></div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <div class="graph" id="velocity"></div>
+        </div>
+      </div>
     </div>
-    <div style="float: left; margin-left:50px; margin-top:10px; width:300px;">
-        <input type="text" id="tempforcing" data-slider="true" value="0" data-slider-range="-15,25" data-slider-step="1"/>
-      <p style="text-align:center">
-        Thermal forcing: <span id="tempforcing">0</span>K
-      </p>
-    </div>
-    <div style="float: left; margin-left:50px; margin-top:10px;">
-      <input type="checkbox" id="sealevel">Sea level lowering</input>
-      <input type="checkbox" id="tempcoupling">Ice-temperature coupling</input><br />
-      <input type="checkbox" id="isostatic">Isostatic bed adjustment</input>
-      <input type="checkbox" id="basalsliding">Basal sliding</input>
-    </div>
-  </div>
-  <div style="float: left; width:400px; padding:0px; margin:0px; position:relative;">
-    <div class="uiblock graph" id="icevolume"></div>
-    <div class="uiblock graph" id="tforcing" ></div>
-  </div>
-  <div class="uiblock graph" id="elevation" ></div>
-  <div class="uiblock graph" id="massbalance"></div>
-  <div class="uiblock graph" id="temperature"></div>
-  <div class="uiblock graph" id="velocity"></div>
-  <script language="javascript" type="text/javascript" src="ism.js"></script>
-</body>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="external/jquery.flot.axislabels.js"></script>
+    <script src="external/bootstrap-slider.min.js"></script>
+    <script>
+      $("#tempforcing").slider({
+        formater: function (value) {
+          if (value > 0) {
+            return '+' + value + '°C';
+          } else {
+            return value + '°C';
+          }
+        },
+        reversed: true
+      })
+    </script>
+    <script language="javascript" type="text/javascript" src="ism.js"></script>
+
+  </body>
 </html>
