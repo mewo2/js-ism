@@ -1,12 +1,12 @@
 ## About ##
 
-J-ISM (Javascript Ice Sheet Model) is an educational numerical model of the Greenland and East Antarctic ice sheets, which runs interactively in a browser. The model allows users to simulate the behaviour of both ice sheets under different climate scenarios, as well as to look at the effects of different physical processes on the results. 
+JS-ISM (Javascript Ice Sheet Model) is an educational numerical model of the Greenland and East Antarctic ice sheets, which runs interactively in a browser. The model allows users to simulate the behaviour of both ice sheets under different climate scenarios, as well as to look at the effects of different physical processes on the results. 
 
 Numerically, the model is a reimplementation of Frank Pattyn's Excel-based [GRANTISM][grantism] - a flowline model using the Shallow Ice Approximation. It includes basal sliding and isostatic adjustment of the bedrock, as well as simplified models of thermomechanical coupling and sea level adjustment.
 
 The model is designed so that it should be easy to provide different interfaces for different classes of user, with some basic knowledge of HTML. A sample interface is provided.
 
-If you want to play with a copy of J-ISM, there's a version online [here][jism]. There are also some basic teaching materials available [here][practical] and [here][model], although these are not up-to-date with the current interface.
+If you want to play with a copy of JS-ISM, there's a version online [here][jsism]. There are also some basic teaching materials available [here][practical] and [here][model], although these are not up-to-date with the current interface.
 
 ## Dependencies ##
 
@@ -23,10 +23,10 @@ There are also some libraries which are loaded via a CDN. You can probably get b
 
 ## License ##
 
-J-ISM is released under an MIT license.
+JS-ISM is released under an MIT license.
 
 
 [grantism]: http://homepages.ulb.ac.be/~fpattyn/grantism/welcome.html
-[jism]: http://mewo2.com/ism.html
+[jsism]: http://mewo2.com/ism.html
 [practical]: http://mewo2.com/assets/practical.pdf
 [model]: http://mewo2.com/assets/model.pdf
