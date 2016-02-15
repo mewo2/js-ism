@@ -1,6 +1,6 @@
-J-ISM is licensed under the MIT License:
+JS-ISM is licensed under the MIT License:
 
-> Copyright (c) 2013-2014: Martin O'Leary
+> Copyright (c) 2013-2016: Martin O'Leary
 > 
 > Permission is hereby granted, free of charge, to any person obtaining
 > a copy of this software and associated documentation files (the
